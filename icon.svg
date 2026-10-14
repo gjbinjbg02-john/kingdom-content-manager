@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#111111"/>
+  <circle cx="256" cy="230" r="145" fill="none" stroke="#D4AF37" stroke-width="12"/>
+  <path d="M111 230 H401 M256 85 C190 140 190 320 256 375 M256 85 C322 140 322 320 256 375" fill="none" stroke="#D4AF37" stroke-width="7"/>
+  <path d="M256 115 L278 170 L336 177 L293 216 L304 274 L256 246 L208 274 L219 216 L176 177 L234 170 Z" fill="#D4AF37"/>
+  <path d="M170 345 Q213 320 256 350 Q299 320 342 345 L342 390 Q299 365 256 395 Q213 365 170 390 Z" fill="#D4AF37"/>
+  <path d="M256 350 V395" stroke="#111111" stroke-width="6"/>
+  <text x="256" y="445" font-family="Arial,sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#D4AF37">KINGDOM</text>
+</svg>
