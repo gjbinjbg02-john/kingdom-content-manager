@@ -1,11 +1,19 @@
 {
-  "name": "Kingdom Content Manager",
-  "short_name": "Kingdom Manager",
-  "description": "My personal Kingdom Content Manager for saving revelations, editing lessons, organizing content, and preparing WhatsApp posts.",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#111111",
-  "theme_color": "#111111"
+"name": "Kingdom Content Manager",
+"short_name": "Kingdom Manager",
+"description": "My personal Kingdom Content Manager for saving revelations, editing lessons, organizing content, and preparing WhatsApp posts.",
+"start_url": "./",
+"scope": "./",
+"display": "standalone",
+"orientation": "portrait",
+"background_color": "#111111",
+"theme_color": "#111111",
+"icons": [
+{
+"src": "./icon.svg",
+"sizes": "any",
+"type": "image/svg+xml",
+"purpose": "any"
+}
+]
 }
