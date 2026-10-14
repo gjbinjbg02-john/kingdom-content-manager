@@ -1,72 +1,146 @@
-<!DOCTYPE html>
+is <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#111827">
-<title>7-Day Teaching Programme | Kingdom Content Manager</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>7-Day Kingdom Teaching Programme</title>
 <style>
-:root {
-  --dark: #111827;
-  --gold: #eab308;
-  --light: #f3f4f6;
-  --white: #ffffff;
-  --green: #166534;
+body{font-family:Arial,sans-serif;background:#f3f4f6;color:#222;margin:0;line-height:1.5}
+header{background:#111827;color:white;padding:20px;border-bottom:4px solid #eab308}
+main{padding:14px;max-width:800px;margin:auto}
+.card{background:white;padding:16px;margin:14px 0;border-radius:10px}
+input,textarea{width:100%;padding:10px;margin:5px 0 12px;box-sizing:border-box;border:1px solid #ccc;border-radius:6px;font:inherit}
+textarea{min-height:100px}
+button{padding:11px;border:0;border-radius:6px;margin:4px;background:#111827;color:white;font-weight:bold}
+.day{border-left:4px solid #eab308;padding:12px;margin:18px 0;background:#fafafa}
+a{color:#eab308}
+</style>
+</head>
+<body>
+<header>
+<h2>📖 7-Day Teaching Programme</h2>
+<p>Kingdom Content Manager | S.O.G.K.E</p>
+</header>
+<main>
+<div class="card">
+<a href="./index.html">← Back to Main App</a>
+<h3>Create Your Programme</h3>
+<label>Teaching Topic</label>
+<input id="topic" placeholder="e.g. Understanding Spiritual Growth">
+<label>Main Bible Passage</label>
+<input id="bible" placeholder="e.g. Ephesians 4:11-15">
+<label>Starting Date</label>
+<input id="date" type="date">
+<button onclick="generate()">Prepare 7 Days</button>
+</div>
+<div class="card">
+<h3>Saved Programmes</h3>
+<select id="saved" style="width:100%;padding:10px"></select>
+<button onclick="load()">Open Saved Programme</button>
+<button onclick="removeSaved()">Delete Programme</button>
+</div>
+<div id="result" class="card" hidden>
+<h3 id="heading"></h3>
+<button onclick="save()">💾 Save Changes</button>
+<div id="days"></div>
+<button onclick="save()">💾 Save All</button>
+</div>
+</main>
+<script>
+const KEY="kingdomTeachingProgrammes_v1";
+let current=null;
+const themes=[
+"Understanding the Foundation",
+"Understanding God's Word",
+"The Heart and Understanding",
+"Living Out the Truth",
+"Growing in Spiritual Maturity",
+"Overcoming Challenges",
+"Walking in the Truth"
+];
+const refs=[
+"2 Timothy 3:16-17; Psalm 119:105",
+"Joshua 1:8; Acts 17:11",
+"Romans 12:2; Ephesians 1:17-18",
+"James 1:22-25; John 14:21",
+"Ephesians 4:13-15; Colossians 1:28",
+"2 Corinthians 10:4-5; Ephesians 6:10-18",
+"Colossians 2:6-7; Philippians 1:9-11"
+];
+function all(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}}
+function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function refresh(){
+saved.innerHTML='<option value="">Choose a programme</option>';
+all().forEach(p=>saved.add(new Option(p.topic,p.id)));
 }
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: var(--light);
-  color: #1f2937;
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
+function generate(){
+let topic=document.getElementById("topic").value.trim();
+if(!topic){alert("Enter a teaching topic first.");return}
+let bible=document.getElementById("bible").value.trim();
+let date=document.getElementById("date").value||new Date().toISOString().slice(0,10);
+current={id:String(Date.now()),topic,bible,date,days:themes.map((t,i)=>{
+let d=new Date(date+"T12:00:00");d.setDate(d.getDate()+i);
+return {title:"Day "+(i+1)+": "+t,date:d.toISOString().slice(0,10),refs:(bible?bible+"; ":"")+refs[i],teaching:"Study the Bible passages in context. Explain what they reveal about "+topic+". Identify the central truth, support your explanation with Scripture, and discuss how this truth applies to Christian life.",application:"1. Read the passages in context.\n2. Write down the truth you have learned.\n3. Put the truth into practice.\n4. Share the lesson with someone.",prayer:"1. Father, grant me understanding of Your Word.\n2. Holy Spirit, help me live out this truth.\n3. Help me grow in Christ and influence others for Your Kingdom.",message:""};} )};
+render();save();
 }
-header {
-  background: var(--dark);
-  color: white;
-  padding: 22px 16px;
-  border-bottom: 4px solid var(--gold);
+function render(){
+result.hidden=false;
+heading.textContent=current.topic;
+days.innerHTML=current.days.map((d,i)=>`
+<div class="day"><h3>${esc(d.title)}</h3>
+<label>Teaching Title</label><input value="${esc(d.title)}" onchange="upd(${i},'title',this.value)">
+<label>Posting Date</label><input type="date" value="${esc(d.date)}" onchange="upd(${i},'date',this.value)">
+<label>Bible References</label><textarea onchange="upd(${i},'refs',this.value)">${esc(d.refs)}</textarea>
+<label>Teaching / Explanation</label><textarea style="min-height:150px" onchange="upd(${i},'teaching',this.value)">${esc(d.teaching)}</textarea>
+<label>Applications</label><textarea onchange="upd(${i},'application',this.value)">${esc(d.application)}</textarea>
+<label>Prayer Points</label><textarea onchange="upd(${i},'prayer',this.value)">${esc(d.prayer)}</textarea>
+<label>WhatsApp Message</label><textarea placeholder="Prepare a message below, then edit it here." onchange="upd(${i},'message',this.value)">${esc(d.message)}</textarea>
+<button onclick="makeMessage(${i})">Prepare WhatsApp Message</button>
+<button onclick="share(${i})">Share on WhatsApp</button>
+<button onclick="copyText(${i})">Copy Teaching</button>
+</div>`).join("");
 }
-header h1 { margin: 0 0 6px; font-size: 23px; }
-header p { margin: 0; color: #e5e7eb; }
-main { max-width: 900px; margin: auto; padding: 16px; }
-.card {
-  background: white;
-  padding: 18px;
-  margin: 16px 0;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px #0000000d;
+function upd(i,k,v){current.days[i][k]=v}
+function makeMessage(i){
+let d=current.days[i];
+d.message="*"+d.title+"*\n\n📖 *Scripture:* "+d.refs+"\n\n*TEACHING*\n"+d.teaching+"\n\n*APPLICATION*\n"+d.application+"\n\n*PRAYER POINTS*\n"+d.prayer;
+render();
 }
-h2, h3 { color: var(--dark); }
-label {
-  display: block;
-  font-weight: bold;
-  margin: 14px 0 5px;
+function share(i){
+let d=current.days[i];
+let text=d.message||("*"+d.title+"*\n\n📖 "+d.refs+"\n\n"+d.teaching+"\n\nAPPLICATION\n"+d.application+"\n\nPRAYER\n"+d.prayer);
+window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank");
 }
-input, textarea, select {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font: inherit;
-  background: white;
+function copyText(i){
+let d=current.days[i];
+let text=d.message||d.title+"\n"+d.refs+"\n\n"+d.teaching+"\n\n"+d.application+"\n\n"+d.prayer;
+if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(()=>alert("Copied! Paste it into WhatsApp.")).catch(()=>prompt("Copy your teaching:",text));
+else prompt("Copy your teaching:",text);
 }
-textarea { min-height: 110px; resize: vertical; }
-button, .back {
-  display: inline-block;
-  border: 0;
-  padding: 11px 14px;
-  border-radius: 8px;
-  margin: 7px 5px 3px 0;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  text-decoration: none;
+function save(){
+if(!current)return;
+current.topic=document.getElementById("topic").value.trim()||current.topic;
+current.bible=document.getElementById("bible").value.trim();
+let list=all(),i=list.findIndex(p=>p.id===current.id);
+if(i<0)list.unshift(current);else list[i]=current;
+try{localStorage.setItem(KEY,JSON.stringify(list));refresh();saved.value=current.id;alert("Programme saved on this device!")}catch(e){alert("Could not save. Please check device storage.")}
 }
-.primary { background: var(--dark); color: white; }
-.gold { background: var(--gold); color: #111827; }
-.green { background: var(--green); color: white; }
-.gray { background: #e5e7eb; color: #111827; }
-.red { background: #fee2e2; color: #991b1b; }
-.day
+function load(){
+current=all().find(p=>p.id===saved.value);
+if(!current){alert("Choose a saved programme.");return}
+document.getElementById("topic").value=current.topic;
+document.getElementById("bible").value=current.bible;
+render();
+}
+function removeSaved(){
+if(!saved.value){alert("Choose a programme first.");return}
+if(!confirm("Delete this programme?"))return;
+localStorage.setItem(KEY,JSON.stringify(all().filter(p=>p.id!==saved.value)));
+if(current&&current.id===saved.value){current=null;result.hidden=true}
+refresh();
+}
+document.getElementById("date").value=new Date().toISOString().slice(0,10);
+refresh();
+</script>
+</body>
+</html>
