@@ -19,7 +19,15 @@
   --green: #16865b;
 }
 * { box-sizing: border-box; }
-body {
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .catch((error) => console.error("Service worker registration failed:", error));
+  });
+}
+</script> 
+  body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
