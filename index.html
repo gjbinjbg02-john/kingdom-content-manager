@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>Kingdom Content Manager</title>
+
+<style>
+:root {
+  --bg: #f4f5f9;
+  --card: #ffffff;
+  --text: #202536;
+  --muted: #72798a;
+  --gold: #d4a63c;
+  --dark: #111827;
+  --border: #e5e7eb;
+  --green: #16865b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+}
+header {
+  background: var(--dark);
+  color: white;
+  padding: 22px 18px;
+  border-bottom: 3px solid var(--gold);
+}
+header h1 { margin: 0 0 7px; font-size: 23px; }
+header p { margin: 0; color: #d1d5db; font-size: 13px; }
+nav {
+  display: flex;
+  gap: 7px;
+  padding: 12px;
+  overflow-x: auto;
+  background: white;
+  border-bottom: 1px solid var(--border);
+}
+nav button {
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 8px;
+  padding: 10px 13px;
+  cursor: pointer;
+}
+nav button.active {
+  background: var(--dark);
+  color: white;
+}
+main { padding: 16px; max-width: 950px; margin: auto; }
+section { display: none; }
+section.active { display: block; }
+h2 { margin-top: 5px; font-size: 23px; }
+h3 { margin-bottom: 8px; }
+p { line-height: 1.5; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 13px;
+  overflow-wrap: anywhere;
+}
+.stat { font-size: 27px; font-weight: bold; color: var(--gold); }
+.muted { color: var(--muted); font-size: 13px; }
+label {
+  display: block;
+  font-weight: bold;
+  margin: 14px 0 6px;
+}
+input, textarea, select {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+  background: white;
+  color: var(--text);
+}
+textarea { min-height: 95px; resize: vertical; }
+button { font: inherit; }
+.btn {
+  background: var(--dark);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 14px;
+  margin: 8px 5px 0 0;
+  cursor: pointer;
+}
+.btn.gold { background: var(--gold); color: #171717; }
+.btn.light { background: #e9ebf0; color: #202536; }
+.btn.danger { background: #b42332; }
+.btn.green { background: var(--green); }
+.item-title { font-size: 18px; font-weight: bold; margin-bottom: 7px; }
+.badge {
+  display: inline-block;
+  background: #f8edcf;
+  color: #70520c;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin: 3px 3px 3px 0;
+}
+.empty { text-align: center; padding: 25px 8px; color: var(--muted); }
+.actions { margin-top: 10px; }
+hr { border: 0; border-top: 1px solid var(--border); margin: 17px 0; }
+footer {
+  text-align: center;
+  padding: 25px 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.hidden { display: none !important; }
+@media(min-width:650px) {
+  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <h1>Kingdom Content Manager</h1>
+  <p>Preserve revelations. Develop understanding. Advance the Kingdom.</p>
+</header>
+
+<nav id="navigation">
+  <button class="active" data-page="dashboard">🏠 Home</button>
+  <button data-page="revelations">📖 Revelations</button>
+  <button data-page="studies">📚 Studies</button>
+  <button data-page="creator">✍️ Creator</button>
+  <button data-page="ai">🤖 AI Assistant</button>
+  <button data-page="planner">📅 Planner</button>
+  <button data-page="history">📜 History</button>
+  <button data-page="backup">💾 Backup</button>
+</nav>
+
+<main>
+
+<section id="dashboard" class="active">
+  <h2>Welcome to your Kingdom workspace</h2>
+  <p class="muted">Your personal space for revelations, Bible studies and Kingdom content.</p>
+
+  <div class="grid">
+    <div class="card"><div class="stat" id="statRev">0</div><div>Saved revelations</div></div>
+    <div class="card"><div class="stat" id="statStudy">0</div><div>Bible studies</div></div>
+    <div class="card"><div class="stat" id="statDraft">0</div><div>Unfinished drafts</div></div>
+    <div class="card"><div class="stat" id="statPlan">0</div><div>Planned posts</div></div>
+  </div>
+
+  <div class="card">
+    <h3>Quick access</h3>
+    <button class="btn gold" onclick="go('revelations');newRevelation()">＋ New Revelation</button>
+    <button class="btn" onclick="go('studies');newStudy()">＋ New Bible Study</button>
+    <button class="btn" onclick="go('creator')">Create WhatsApp Content</button>
+    <button class="btn" onclick="go('planner');newPlan()">Plan a Post</button>
+  </div>
+
+  <div class="card">
+    <h3>⭐ Favourite Revelations</h3>
+    <div id="favourites"></div>
+  </div>
+
+  <div class="card">
+    <h3>Upcoming Posts</h3>
+    <div id="upcoming"></div>
+  </div>
+</section>
+
+<section id="revelations">
+  <h2>📖 Personal Revelation Library</h2>
+  <p>Record what you are learning, the Scriptures involved and how the revelation applies to your life.</p>
+  <button class="btn gold" onclick="newRevelation()">＋ Add Revelation</button>
+  <input id="revSearch" placeholder="Search revelations..." oninput="renderRevelations()">
+
+  <div id="revList"></div>
+
+  <div class="card" id="revFormCard" hidden>
+    <h3 id="revFormTitle">New Revelation</h3>
+    <form id="revForm">
+      <input type="hidden" id="revId">
+
+      <label for="revTitle">Title</label>
+      <input id="revTitle" required>
+
+      <label for="revBible">Bible references</label>
+      <input id="revBible" placeholder="e.g. 2 Corinthians 3:17–18">
+
+      <label for="revBody">Personal revelation</label>
+      <textarea id="revBody" required></textarea>
+
+      <label for="revLessons">Lessons and applications</label>
+      <textarea id="revLessons"></textarea>
+
+      <label for="revWhatsApp">WhatsApp-ready message</label>
+      <textarea id="revWhatsApp"></textarea>
+
+      <label for="revCategory">Category</label>
+      <input id="revCategory" list="categories" value="Personal Revelations">
+      <datalist id="categories">
+        <option>The Kingdom of God</option>
+        <option>The Holy Spirit</option>
+        <option>Spiritual Growth</option>
+        <option>Prayer and Intercession</option>
+        <option>S.O.G.K.E Ministry Teachings</option>
+        <option>Christian Character and Maturity</option>
+        <option>Evangelism and Discipleship</option>
+        <option>Personal Revelations</option>
+      </datalist>
+
+      <label for="revStatus">Status</label>
+      <select id="revStatus">
+        <option value="saved">Saved</option>
+        <option value="draft">Draft</option>
+      </select>
+
+      <button class="btn gold" type="submit">Save Revelation</button>
+      <button class="btn light" type="button" onclick="cancelRev()">Cancel</button>
+    </form>
+  </div>
+</section>
+
+<section id="studies">
+  <h2>📚 Kingdom Study Centre</h2>
+  <p>Keep your Bible study notes, observations, lessons and practical applications together.</p>
+  <button class="btn gold" onclick="newStudy()">＋ New Study</button>
+  <input id="studySearch" placeholder="Search Bible studies..." oninput="renderStudies()">
+  <div id="studyList"></div>
+
+  <div class="card" id="studyFormCard" hidden>
+    <h3 id="studyFormTitle">New Bible Study</h3>
+    <form id="studyForm">
+      <input type="hidden" id="studyId">
+
+      <label for="studyTitle">Study title</label>
+      <input id="studyTitle" required>
+
+      <label for="studyTopic">Topic</label>
+      <input id="studyTopic">
+
+      <label for="studyBible">Key Scriptures</label>
+      <input id="studyBible" placeholder="e.g. Matthew 6:33">
+
+      <label for="studyObs">Personal observations</label>
+      <textarea id="studyObs"></textarea>
+
+      <label for="studyLessons">Lessons learned</label>
+      <textarea id="studyLessons"></textarea>
+
+      <label for="studyApps">Practical applications</label>
+      <textarea id="studyApps"></textarea>
+
+      <label for="studyRelated">Related revelations or studies</label>
+      <input id="studyRelated" placeholder="Titles or topics">
+
+      <label for="studyCategory">Category</label>
+      <input id="studyCategory" list="categories" value="The Kingdom of God">
+
+      <button class="btn gold" type="submit">Save Study</button>
+      <button class="btn light" type="button" onclick="cancelStudy()">Cancel</button>
+    </form>
+  </div>
+</section>
+
+<section id="creator">
+  <h2>✍️ WhatsApp Content Creator</h2>
+  <p>Prepare devotionals, Bible teachings, prayer points and exhortations. Nothing is published without your approval.</p>
+
+  <label for="createSource">Start from saved content (optional)</label>
+  <select id="createSource" onchange="loadSource()">
+    <option value="">Write something new</option>
+  </select>
+
+  <label for="createType">Content type</label>
+  <select id="createType">
+    <option>Short WhatsApp Message</option>
+    <option>Daily Devotional</option>
+    <option>Bible Teaching</option>
+    <option>Prayer Points</option>
+    <option>Scripture-based Exhortation</option>
+  </select>
+
+  <label for="createTitle">Title</label>
+  <input id="createTitle" placeholder="Enter a title">
+
+  <label for="createBible">Bible references</label>
+  <input id="createBible" placeholder="Scripture references to verify">
+
+  <label for="createBody">Your message</label>
+  <textarea id="createBody" style="min-height:220px" placeholder="Write or edit your message here..."></textarea>
+
+  <button class="btn gold" onclick="saveCreated()">Save to Drafts</button>
+  <button class="btn" onclick="copyMessage()">Copy Message</button>
+  <button class="btn green" onclick="shareMessage()">Share</button>
+  <p class="muted">Sharing opens the options supported by your Android device. You choose where to send the message.</p>
+</section>
+
+<section id="ai">
+  <h2>🤖 AI Assistant</h2>
+  <div class="card">
+    <strong>AI connection: Not configured</strong>
+    <p>This first version provides writing templates, not a genuine AI service. We will add an AI connection separately when a suitable service is configured securely.</p>
+  </div>
+
+  <label for="aiTask">What would you like help preparing?</label>
+  <select id="aiTask">
+    <option value="teaching">Bible teaching outline</option>
+    <option value="grammar">Grammar and clarity review</option>
+    <option value="prayer">Prayer points</option>
+    <option value="devotional">Daily devotional outline</option>
+    <option value="exhortation">Scripture-based exhortation</option>
+  </select>
+
+  <label for="aiInput">Your original notes</label>
+  <textarea id="aiInput" placeholder="Paste your notes here."></textarea>
+
+  <button class="btn gold" onclick="makeTemplate()">Prepare Writing Template</button>
+
+  <label for="aiOutput">Generated template</label>
+  <textarea id="aiOutput" style="min-height:200px" placeholder="Your original notes will not be overwritten."></textarea>
+  <button class="btn" onclick="copyText('aiOutput')">Copy Template</button>
+  <button class="btn green" onclick="saveAI()">Save as Separate Draft</button>
+</section>
+
+<section id="planner">
+  <h2>📅 Content Planner</h2>
+  <button class="btn gold" onclick="newPlan()">＋ Plan a Post</button>
+  <div id="planList"></div>
+
+  <div class="card" id="planFormCard" hidden>
+    <h3>Plan a Post</h3>
+    <form id="planForm">
+      <input type="hidden" id="planId">
+
+      <label for="planTitle">Post title</label>
+      <input id="planTitle" required>
+
+      <label for="planDate">Date and time</label>
+      <input id="planDate" type="datetime-local" required>
+
+      <label for="planMessage">Message</label>
+      <textarea id="planMessage"></textarea>
+
+      <label for="planSource">Related revelation or study</label>
+      <input id="planSource" placeholder="Optional">
+
+      <button class="btn gold" type="submit">Save Plan</button>
+      <button class="btn light" type="button" onclick="cancelPlan()">Cancel</button>
+    </form>
+  </div>
+</section>
+
+<section id="history">
+  <h2>📜 Posting History</h2>
+  <p>Record content you have actually shared. The app does not automatically publish to WhatsApp.</p>
+  <div id="historyList"></div>
+</section>
+
+<section id="backup">
+  <h2>💾 Storage and Backup</h2>
+  <div class="card">
+    <h3>Your content storage</h3>
+    <p>Content is stored in this browser on this device. It is not automatically synchronized with GitHub or another device.</p>
+    <p><strong>Important:</strong> Export a backup regularly. Clearing browser data can delete locally saved content.</p>
+    <button class="btn gold" onclick="exportBackup()">Export Backup</button>
+
+    <label for="backupFile">Restore a previous backup</label>
+    <input id="backupFile" type="file" accept=".json,application/json">
+    <button class="btn" onclick="importBackup()">Import Backup</button>
+  </div>
+
+  <div class="card">
+    <h3>Installation</h3>
+    <p>After publishing this app and adding the installation files, we can test adding it to your Android home screen and enabling offline access.</p>
+    <p>Do not clear your browser data until you have exported your content and verified your backup.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Kingdom Content Manager · Personal study and content workspace
+</footer>
+
+<script>
+const STORE = "kingdomContentManager_v1";
+
+let db = {
+  revelations: [],
+  studies: [],
+  drafts: [],
+  plans: [],
+  history: []
+};
+
+function loadDB() {
+  try {
+    const saved = localStorage.getItem(STORE);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      db = {
+        revelations: Array.isArray(parsed.revelations) ? parsed.revelations : [],
+        studies: Array.isArray(parsed.studies) ? parsed.studies : [],
+        drafts: Array.isArray(parsed.drafts) ? parsed.drafts : [],
+        plans: Array.isArray(parsed.plans) ? parsed.plans : [],
+        history: Array.isArray(parsed.history) ? parsed.history : []
+      };
+    }
+  } catch (e) {
+    alert("Saved data could not be read. Exported backups may help restore content.");
+  }
+}
+
+function persist() {
+  try {
+    localStorage.setItem(STORE, JSON.stringify(db));
+    renderAll();
+    return true;
+  } catch (e) {
+    alert("Your browser could not save the changes. Export a backup and check available storage.");
+    return false;
+  }
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[ch]);
+}
+
+function go(page) {
+  document.querySelectorAll("main section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+  document.getElementById(page).classList.add("active");
+  document.querySelector('[data-page="' + page + '"]').classList.add("active");
+  window.scrollTo(0, 0);
+}
+
+document.getElementById("navigation").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-page]");
+  if (btn) go(btn.dataset.page);
+});
+
+function renderAll() {
+  renderDashboard();
+  renderRevelations();
+  renderStudies();
+  renderCreatorOptions();
+  renderPlans();
+  renderHistory();
+}
+
+function renderDashboard() {
+  document.getElementById("statRev").textContent = db.revelations.length;
+  document.getElementById("statStudy").textContent = db.studies.length;
+  document.getElementById("statDraft").textContent =
+    db.revelations.filter(x => x.status === "draft").length + db.drafts.length;
+  document.getElementById("statPlan").textContent =
+    db.plans.filter(x => !x.completed).length;
+
+  const favs = db.revelations.filter(x => x.favorite);
+  document.getElementById("favourites").innerHTML = favs.length
+    ? favs.map(x => `<div class="card"><strong>${escapeHTML(x.title)}</strong>
+      <button class="btn light" onclick="editRev('${x.id}')">Open</button></div>`).join("")
+    : '<div class="empty">Your favourite revelations will appear here.</div>';
+
+  const upcoming = db.plans.filter(x => !x.completed)
+    .sort((a,b) => a.date.localeCompare(b.date)).slice(0,5);
+  document.getElementById("upcoming").innerHTML = upcoming.length
+    ? upcoming.map(x => `<div class="card"><strong>${escapeHTML(x.title)}</strong>
+      <p class="muted">${escapeHTML(x.date.replace("T"," "))}</p></div>`).join("")
+    : '<div class="empty">No planned posts yet.</div>';
+}
+
+function newRevelation() {
+  document.getElementById("revForm").reset();
+  document.getElementById("revId").value = "";
+  document.getElementById("revFormTitle").textContent = "New Revelation";
+  document.getElementById("revFormCard").hidden = false;
+  document.getElementById("revFormCard").scrollIntoView({behavior:"smooth"});
+}
+
+function cancelRev() {
+  document.getElementById("revFormCard").hidden = true;
+}
+
+document.getElementById("revForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const id = document.getElementById("revId").value;
+  const old = db.revelations.find(x => x.id === id);
+  const item = {
+    id: id || uid(),
+    title: document.getElementById("revTitle").value.trim(),
+    bible: document.getElementById("revBible").value.trim(),
+    body: document.getElementById("revBody").value.trim(),
+    lessons: document.getElementById("revLessons").value.trim(),
+    whatsapp: document.getElementById("revWhatsApp").value.trim(),
+    category: document.getElementById("revCategory").value.trim() || "Personal Revelations",
+    status: document.getElementById("revStatus").value,
+    date: old?.date || new Date().toISOString(),
+    favorite: old?.favorite || false
+  };
+  if (old) db.revelations[db.revelations.findIndex(x => x.id === id)] = item;
+  else db.revelations.unshift(item);
+  if (persist()) {
+    cancelRev();
+    go("revelations");
+  }
+});
+
+function editRev(id) {
+  const x = db.revelations.find(r => r.id === id);
+  if (!x) return;
+  go("revelations");
+  document.getElementById("revFormCard").hidden = false;
+  document.getElementById("revFormTitle").textContent = "Edit Revelation";
+  document.getElementById("revId").value = x.id;
+  document.getElementById("revTitle").value = x.title;
+  document.getElementById("revBible").value = x.bible;
+  document.getElementById("revBody").value = x.body;
+  document.getElementById("revLessons").value = x.lessons;
+  document.getElementById("revWhatsApp").value = x.whatsapp;
+  document.getElementById("revCategory").value = x.category;
+  document.getElementById("revStatus").value = x.status;
+  document.getElementById("revFormCard").scrollIntoView({behavior:"smooth"});
+}
+
+function renderRevelations() {
+  const q = (document.getElementById("revSearch")?.value || "").toLowerCase();
+  const items = db.revelations.filter(x =>
+    [x.title,x.bible,x.body,x.lessons,x.category].join(" ").toLowerCase().includes(q)
+  );
+  document.getElementById("revList").innerHTML = items.length ? items.map(x => `
+    <div class="card">
+      <div class="item-title">${escapeHTML(x.title)}</div>
+      <span class="badge">${escapeHTML(x.category)}</span>
+      <span class="badge">${x.status === "draft" ? "Draft" : "Saved"}</span>
+      ${x.favorite ? '<span class="badge">⭐ Favourite</span>' : ''}
+      <p class="muted">${escapeHTML(x.bible)}</p>
+      <p>${escapeHTML(x.body).replace(/\n/g,"<br>")}</p>
+      ${x.lessons ? `<p><strong>Lessons:</strong><br>${escapeHTML(x.lessons).replace(/\n/g,"<br>")}</p>` : ''}
+      <div class="actions">
+        <button class="btn" onclick="editRev('${x.id}')">Edit</button>
+        <button class="btn light" onclick="toggleFav('${x.id}')">${x.favorite ? "Unfavourite" : "⭐ Favourite"}</button>
+        <button class="btn light" onclick="useRev('${x.id}')">Create Post</button>
+        <button class="btn danger" onclick="deleteRev('${x.id}')">Delete</button>
+      </div>
+    </div>`).join("") : '<div class="empty">No matching revelations. Add your first one above.</div>';
+}
+
+function toggleFav(id) {
+  const x = db.revelations.find(r => r.id === id);
+  if (x) { x.favorite = !x.favorite; persist(); }
+}
+
+function deleteRev(id) {
+  if (!confirm("Delete this revelation? This action cannot be undone unless you have a backup.")) return;
+  db.revelations = db.revelations.filter(x => x.id !== id);
+  persist();
+}
+
+function useRev(id) {
+  const x = db.revelations.find(r => r.id === id);
+  if (!x) return;
+  go("creator");
+  document.getElementById("createSource").value = "r:" + id;
+  loadSource();
+}
+
+function newStudy() {
+  document.getElementById("studyForm").reset();
+  document.getElementById("studyId").value = "";
+  document.getElementById("studyFormTitle").textContent = "New Bible Study";
+  document.getElementById("studyFormCard").hidden = false;
+  document.getElementById("studyFormCard").scrollIntoView({behavior:"smooth"});
+}
+
+function cancelStudy() {
+  document.getElementById("studyFormCard").hidden = true;
+}
+
+document.getElementById("studyForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const id = document.getElementById("studyId").value;
+  const item = {
+    id: id || uid(),
+    title: document.getElementById("studyTitle").value.trim(),
+    topic: document.getElementById("studyTopic").value.trim(),
+    bible: document.getElementById("studyBible").value.trim(),
+    obs: document.getElementById("studyObs").value.trim(),
+    lessons: document.getElementById("studyLessons").value.trim(),
+    apps: document.getElementById("studyApps").value.trim(),
+    related: document.getElementById("studyRelated").value.trim(),
+    category: document.getElementById("studyCategory").value.trim() || "The Kingdom of God",
+    date: new Date().toISOString()
+  };
+  const index = db.studies.findIndex(x => x.id === id);
+  if (index >= 0) db.studies[index] = item;
+  else db.studies.unshift(item);
+  if (persist()) cancelStudy();
+});
+
+function editStudy(id) {
+  const x = db.studies.find(s => s.id === id);
+  if (!x) return;
+  go("studies");
+  document.getElementById("studyFormCard").hidden = false;
+  document.getElementById("studyFormTitle").textContent = "Edit Bible Study";
+  document.getElementById("studyId").value = x.id;
+  document.getElementById("studyTitle").value = x.title;
+  document.getElementById("studyTopic").value = x.topic;
+  document.getElementById("studyBible").value = x.bible;
+  document.getElementById("studyObs").value = x.obs;
+  document.getElementById("studyLessons").value = x.lessons;
+  document.getElementById("studyApps").value = x.apps;
+  document.getElementById("studyRelated").value = x.related;
+  document.getElementById("studyCategory").value = x.category;
+  document.getElementById("studyFormCard").scrollIntoView({behavior:"smooth"});
+}
+
+function renderStudies() {
+  const q = (document.getElementById("studySearch")?.value || "").toLowerCase();
+  const items = db.studies.filter(x =>
+    [x.title,x.topic,x.bible,x.obs,x.lessons,x.category].join(" ").toLowerCase().includes(q)
+  );
+  document.getElementById("studyList").innerHTML = items.length ? items.map(x => `
+    <div class="card">
+      <div class="item-title">${escapeHTML(x.title)}</div>
+      <span class="badge">${escapeHTML(x.category)}</span>
+      <p><strong>Topic:</strong> ${escapeHTML(x.topic)}</p>
+      <p><strong>Scriptures:</strong> ${escapeHTML(x.bible)}</p>
+      <p><strong>Observations:</strong><br>${escapeHTML(x.obs).replace(/\n/g,"<br>")}</p>
+      <p><strong>Lessons:</strong><br>${escapeHTML(x.lessons).replace(/\n/g,"<br>")}</p>
+      <p><strong>Applications:</strong><br>${escapeHTML(x.apps).replace(/\n/g,"<br>")}</p>
+      <p><strong>Related:</strong> ${escapeHTML(x.related)}</p>
+      <button class="btn" onclick="editStudy('${x.id}')">Edit</button>
+      <button class="btn light" onclick="studyToPost('${x.id}')">Create Post</button>
+      <button class="btn danger" onclick="deleteStudy('${x.id}')">Delete</button>
+    </div>`).join("") : '<div class="empty">No studies found. Create your first Bible study.</div>';
+}
+
+function deleteStudy(id) {
+  if (!confirm("Delete this Bible study?")) return;
+  db.studies = db.studies.filter(x => x.id !== id);
+  persist();
+}
+
+function studyToPost(id) {
+  const x = db.studies.find(s => s.id === id);
+  if (!x) return;
+  go("creator");
+  document.getElementById("createSource").value = "s:" + id;
+  loadSource();
+}
+
+function renderCreatorOptions() {
+  const select = document.getElementById("createSource");
+  if (!select) return;
+  const old = select.value;
+  select.innerHTML = '<option value="">Write something new</option>' +
+    db.revelations.map(x => `<option value="r:${x.id}">Revelation: ${escapeHTML(x.title)}</option>`).join("") +
+    db.studies.map(x => `<option value="s:${x.id}">Study: ${escapeHTML(x.title)}</option>`).join("");
+  if ([...select.options].some(o => o.value === old)) select.value = old;
+}
+
+function loadSource() {
+  const val = document.getElementById("createSource").value;
+  let x;
+  if (val.startsWith("r:")) {
+    x = db.revelations.find(r => r.id === val.slice(2));
+    if (x) {
+      document.getElementById("createTitle").value = x.title;
+      document.getElementById("createBible").value = x.bible;
+      document.getElementById("createBody").value = x.whatsapp || (x.body + "\n\nLessons: " + x.lessons);
+    }
+  } else if (val.startsWith("s:")) {
+    x = db.studies.find(s => s.id === val.slice(2));
+    if (x) {
+      document.getElementById("createTitle").value = x.title;
+      document.getElementById("createBible").value = x.bible;
+      document.getElementById("createBody").value =
+        x.obs + "\n\nLessons: " + x.lessons + "\n\nApplications: " + x.apps;
+    }
+  }
+}
+
+function saveCreated() {
+  const title = document.getElementById("createTitle").value.trim();
+  const body = document.getElementById("createBody").value.trim();
+  if (!body) return alert("Enter a message first.");
+  db.drafts.unshift({
+    id: uid(), title: title || "Untitled Message",
+    type: document.getElementById("createType").value,
+    bible: document.getElementById("createBible").value.trim(),
+    body, date: new Date().toISOString()
+  });
+  if (persist()) alert("Your message has been saved to drafts.");
+}
+
+async function copyMessage() {
+  const body = document.getElementById("createBody").value;
+  if (!body) return alert("Write a message first.");
+  try {
+    await navigator.clipboard.writeText(body);
+    alert("Message copied.");
+  } catch (e) {
+    document.getElementById("createBody").focus();
+    document.getElementById("createBody").select();
+    alert("If copying did not happen automatically, use your phone's Copy option.");
+  }
+}
+
+async function copyText(id) {
+  const el = document.getElementById(id);
+  if (!el.value) return alert("Nothing to copy yet.");
+  try {
+    await navigator.clipboard.writeText(el.value);
+    alert("Copied.");
+  } catch (e) {
+    el.focus(); el.select();
+    alert("Use your phone's Copy option.");
+  }
+}
+
+async function shareMessage() {
+  const title = document.getElementById("createTitle").value;
+  const text = document.getElementById("createBody").value;
+  if (!text) return alert("Write a message first.");
+  if (navigator.share) {
+    try { await navigator.share({title, text}); }
+    catch (e) { if (e.name !== "AbortError") alert("Sharing was unavailable."); }
+  } else {
+    copyMessage();
+  }
+}
+
+function makeTemplate() {
+  const notes = document.getElementById("aiInput").value.trim();
+  if (!notes) return alert("Enter your notes first.");
+  const task = document.getElementById("aiTask").value;
+  const templates = {
+    teaching: "BIBLE TEACHING OUTLINE\n\nTitle: [Add title]\nKey Scriptures: [Verify references]\n\nIntroduction:\n" + notes + "\n\nMain points:\n1. [Develop from your notes]\n2. [Support with Scripture]\n3. [Practical application]\n\nConclusion:\n[Summarise the central truth]\n\nStudy and verify all Scripture references.",
+    grammar: "ORIGINAL NOTES — FOR EDITING\n\n" + notes + "\n\nEditing checklist:\n1. Correct spelling and grammar.\n2. Clarify the central message.\n3. Preserve the original meaning.\n4. Verify every Scripture reference.",
+    prayer: "PRAYER POINTS\n\nBased on these notes:\n" + notes + "\n\n1. Thanksgiving: [Add prayer]\n2. Understanding: [Add prayer]\n3. Application: [Add prayer]\n4. Intercession: [Add prayer]\n\nVerify the Scriptures and personalise each prayer.",
+    devotional: "DAILY DEVOTIONAL OUTLINE\n\nTitle: [Add title]\nScripture: [Verify reference]\n\nReflection:\n" + notes + "\n\nPersonal application:\n[Add practical response]\n\nPrayer:\n[Write a prayer based on the passage]",
+    exhortation: "SCRIPTURE-BASED EXHORTATION\n\nTheme: [Add theme]\nScripture: [Verify reference]\n\nMessage:\n" + notes + "\n\nResponse:\n[Add a practical response]\n\nClosing encouragement:\n[Summarise the main truth]"
+  };
+  document.getElementById("aiOutput").value = templates[task];
+}
+
+function saveAI() {
+  const body = document.getElementById("aiOutput").value.trim();
+  if (!body) return alert("Prepare a template first.");
+  db.drafts.unshift({
+    id: uid(), title: "AI Assistant Template",
+    type: "Writing Template", bible: "",
+    body, date: new Date().toISOString()
+  });
+  if (persist()) alert("Saved separately as a draft. Your original notes remain unchanged.");
+}
+
+function newPlan() {
+  document.getElementById("planForm").reset();
+  document.getElementById("planId").value = "";
+  document.getElementById("planFormCard").hidden = false;
+  document.getElementById("planFormCard").scrollIntoView({behavior:"smooth"});
+}
+
+function cancelPlan() {
+  document.getElementById("planFormCard").hidden = true;
+}
+
+document.getElementById("planForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const id = document.getElementById("planId").value;
+  const old = db.plans.find(p => p.id === id);
+  const item = {
+    id: id || uid(),
+    title: document.getElementById("planTitle").value.trim(),
+    date: document.getElementById("planDate").value,
+    message: document.getElementById("planMessage").value.trim(),
+    source: document.getElementById("planSource").value.trim(),
+    completed: old?.completed || false
+  };
+  const index = db.plans.findIndex(p => p.id === id);
+  if (index >= 0) db.plans[index] = item;
+  else db.plans.push(item);
+  if (persist()) cancelPlan();
+});
+
+function renderPlans() {
+  const items = [...db.plans].sort((a,b) => a.date.localeCompare(b.date));
+  document.getElementById("planList").innerHTML = items.length ? items.map(x => `
+    <div class="card">
+      <div class="item-title">${escapeHTML(x.title)}</div>
+      <span class="badge">${x.completed ? "Completed" : "Planned"}</span>
+      <p>${escapeHTML(x.date.replace("T"," "))}</p>
+      <p>${escapeHTML(x.source)}</p>
+      <button class="btn" onclick="editPlan('${x.id}')">Edit</button>
+      ${!x.completed ? `<button class="btn green" onclick="completePlan('${x.id}')">Mark Posted</button>` : ''}
+      <button class="btn light" onclick="planToCreator('${x.id}')">Open Message</button>
+      <button class="btn danger" onclick="deletePlan('${x.id}')">Delete</button>
+    </div>`).join("") : '<div class="empty">No planned posts yet.</div>';
+}
+
+function editPlan(id) {
+  const x = db.plans.find(p => p.id === id);
+  if (!x) return;
+  document.getElementById("planId").value = x.id;
+  document.getElementById("planTitle").value = x.title;
+  document.getElementById("planDate").value = x.date;
+  document.getElementById("planMessage").value = x.message;
+  document.getElementById("planSource").value = x.source;
+  document.getElementById("planFormCard").hidden = false;
+  document.getElementById("planFormCard").scrollIntoView({behavior:"smooth"});
+}
+
+function completePlan(id) {
+  const x = db.plans.find(p => p.id === id);
+  if (!x) return;
+  if (!confirm("Have you actually posted this message?")) return;
+  x.completed = true;
+  db.history.unshift({
+    id: uid(), title: x.title, message: x.message,
+    date: new Date().toISOString(), source: x.source
+  });
+  persist();
+}
+
+function planToCreator(id) {
+  const x = db.plans.find(p => p.id === id);
+  if (!x) return;
+  go("creator");
+  document.getElementById("createTitle").value = x.title;
+  document.getElementById("createBody").value = x.message;
+}
+
+function deletePlan(id) {
+  if (!confirm("Delete this planned post?")) return;
+  db.plans = db.plans.filter(p => p.id !== id);
+  persist();
+}
+
+function renderHistory() {
+  document.getElementById("historyList").innerHTML = db.history.length
+    ? db.history.map(x => `
+      <div class="card">
+        <div class="item-title">${escapeHTML(x.title)}</div>
+        <p class="muted">${escapeHTML(x.date.slice(0,10))}</p>
+        <p>${escapeHTML(x.message)}</p>
+        <button class="btn" onclick="reuseHistory('${x.id}')">Reuse Message</button>
+        <button class="btn danger" onclick="deleteHistory('${x.id}')">Delete</button>
+      </div>`).join("")
+    : '<div class="empty">Your completed posts will appear here.</div>';
+}
+
+function reuseHistory(id) {
+  const x = db.history.find(h => h.id === id);
+  if (!x) return;
+  go("creator");
+  document.getElementById("createTitle").value = x.title;
+  document.getElementById("createBody").value = x.message;
+}
+
+function deleteHistory(id) {
+  if (!confirm("Delete this history entry?")) return;
+  db.history = db.history.filter(x => x.id !== id);
+  persist();
+}
+
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(db, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "kingdom-content-backup-" + new Date().toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function importBackup() {
+  const file = document.getElementById("backupFile").files[0];
+  if (!file) return alert("Choose a backup file first.");
+  if (!confirm("Importing will replace the content currently stored in this app. Export your current content first if you need it.")) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const x = JSON.parse(reader.result);
+      if (!x || !Array.isArray(x.revelations) || !Array.isArray(x.studies) ||
+          !Array.isArray(x.drafts) || !Array.isArray(x.plans) ||
+          !Array.isArray(x.history)) {
+        throw new Error("Invalid backup");
+      }
+      db = x;
+      if (persist()) alert("Backup imported successfully.");
+    } catch (e) {
+      alert("That backup could not be imported. Please choose a valid Kingdom Content Manager backup.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+loadDB();
+renderAll();
+</script>
+</body>
+  </html>
